@@ -10,11 +10,11 @@ class User:
         # No data yet
         self.likes = 0
         self.comments = 0
-        self.shares = 0
+        self.sharedposts = 0
 
     def get_total_score(self):
         """Returns the total number of Facebook actions"""
-        return self.likes + self.comments + self.shares
+        return self.likes + self.comments + self.sharedposts
 
     def __eq__(self, other):
         return self.get_total_score() == other.get_total_score()
@@ -23,10 +23,10 @@ class User:
         return self.get_total_score() < other.get_total_score()
 
     def __str__(self):
-        return (self.userid + ': ' +
-                self.likes + ' likes,' +
-                self.comments + 'comments and' +
-                self.shares + 'shares'
+        return (str(self.userid) + ': ' +
+                str(self.likes) + ' likes,' +
+                str(self.comments) + ' comments and' +
+                str(self.sharedposts) + ' sharedposts'
                )
 
 
@@ -43,7 +43,7 @@ def write_users_to_file(userlist, filename='data.csv'):
         )
 
         # Write a header row with titles for data
-        writer.writerow(['userid', 'name', 'likes', 'comments', 'shares', 'total score'])
+        writer.writerow(['userid', 'name', 'likes', 'comments', 'sharedposts', 'total score'])
 
         # Loop though list of users and write a row of CSV for each
         for user in userlist:
@@ -52,7 +52,7 @@ def write_users_to_file(userlist, filename='data.csv'):
                 user.name,
                 user.likes,
                 user.comments,
-                user.shares,
+                user.sharedposts,
                 user.get_total_score()
             ])
 

@@ -111,10 +111,10 @@ def tally_points(posts, fb_api):
 
     return users
 
-def get_users_with_data(pageid, month, fb_api):
+def get_users_with_data(pageid, month, year, fb_api):
     """Returns a sorted list of the users populated with point data"""
     # Get a tuple of datetime objects, one at the start of the month, one at the end
-    time_period = get_time_period(month=month)
+    time_period = get_time_period(month=month, year=year)
 
     # Get a list of the posts on the page within the two dates in time_period
     posts = fb_api.get_connections(

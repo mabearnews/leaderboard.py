@@ -7,13 +7,13 @@ import os.path
 from user_utils import write_users_to_file
 from facebook_utils import get_api_connection, get_users_with_data
 
-def run(pageid, month, app_id, app_secret):
+def run(pageid, month, year, app_id, app_secret):
     """Runs data analysis"""
     # Connect to Facebook
     graph = get_api_connection(app_id, app_secret)
 
     # Retrieve data
-    user_data = get_users_with_data(pageid, month, graph)
+    user_data = get_users_with_data(pageid, month, year, graph)
 
     # Write data to file
     write_users_to_file(user_data)
@@ -64,7 +64,7 @@ def main():
     )
     args = parser.parse_args()
 
-    run(args.pageid, args.month, args.appid, args.appsecret)
+    run(args.pageid, args.month, args.year, args.appid, args.appsecret)
 
 
 if __name__ == "__main__":

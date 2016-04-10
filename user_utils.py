@@ -1,3 +1,5 @@
+"""User class and offline helper functions"""
+
 import csv
 
 class User:

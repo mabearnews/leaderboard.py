@@ -1,43 +1,72 @@
-from datetime import datetime, timedelta
-import operator
+"""Main module"""
+import configparser
+import argparse
+from datetime import date
+import os.path
 
 from user_utils import write_users_to_file
-from facebook_utils import get_api_connection, tally_points
+from facebook_utils import get_api_connection, get_users_with_data
 
-APP_ID = '918318618262430'
-APP_SECRET = '53bfcc093081bf5ed480f49550238031'
+def run(pageid, month, app_id, app_secret):
+    """Runs data analysis"""
+    # Connect to Facebook
+    graph = get_api_connection(app_id, app_secret)
 
-MACHRONICLE_PAGEID = 'machronicle/posts'
+    # Retrieve data
+    user_data = get_users_with_data(pageid, month, graph)
+
+    # Write data to file
+    write_users_to_file(user_data)
+
+def read_api_config():
+    """Returns a tuple of (appid, appsecret)"""
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    api = config['API CONNECTION']
+    return (api['AppID'], api['AppSecret'])
 
 
-graph = get_api_connection(APP_ID, APP_SECRET)
+def main():
+    """Main thread when run from cmd"""
+    api_config = (None, None)
+    if os.path.isfile('config.ini'):
+        api_config = read_api_config()
+
+    parser = argparse.ArgumentParser(
+        description='Create CSV of Facebook page like, comment and share data'
+    )
+    parser.add_argument(
+        'pageid',
+        help='the name of the Facebook page from the url: facebook.com/[pageid]/'
+    )
+    parser.add_argument(
+        '--month',
+        help='the month to search in in integer form',
+        choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        default=date.today().month,
+        type=int
+    )
+    parser.add_argument(
+        '--year',
+        help='the integer year to search if not the current year',
+        default=date.today().year,
+        type=int
+    )
+    parser.add_argument(
+        '--appid',
+        help='override appid from config file',
+        default=api_config[0]
+    )
+    parser.add_argument(
+        '--appsecret',
+        help='override appsecret from config file',
+        default=api_config[1]
+    )
+    args = parser.parse_args()
+
+    run(args.pageid, args.month, args.appid, args.appsecret)
 
 
-def get_time_period(year=datetime.today().year, month=datetime.today().month):
-    """Returns a tuple containing the first of the month and the first of the next month,
-    capturing the entire month. Times are datetime objects"""
+if __name__ == "__main__":
+    main()
 
-    start = datetime(year, month, 1)
-
-    # Wrap month around to January from December
-    end = datetime(year, month + 1, 1) if month < 12 else datetime(year, 1, 1)
-
-    print(str(start) + "  " + str(end))
-
-    return (start, end)
-
-time_period = get_time_period(month=3)
-
-posts = graph.get_object(
-    id=MACHRONICLE_PAGEID,
-    since=round(time_period[0].timestamp()),
-    until=round(time_period[1].timestamp())
-)['data']
-
-users = tally_points(posts, graph)
-
-sorted_users = sorted(users.items(), key=operator.itemgetter(1), reverse=True)
-
-sorted_users = [ tup[1] for tup in sorted_users ]
-
-write_users_to_file(sorted_users) 

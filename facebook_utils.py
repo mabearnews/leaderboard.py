@@ -1,8 +1,10 @@
+"""Facebook helper functions and data parsing functions"""
+
 import facebook
 import requests
-from logging import Logger
 
 from user_utils import User
+from misc_utils import get_time_period
 
 def get_api_connection(appid, app_secret):
     """Return a facebook-sdk object authenticated
@@ -31,7 +33,7 @@ def check_post(post, stat, user_dict, fb_api):
 
     # Pull down the likes, comments or sharedposts
     items_found = fb_api.get_connections(post['id'], stat)['data']
-    
+
     # likes results in an array of users, but comments and sharedposts
     # do not, so this ensures that we process user objects only
     if stat is 'likes':
@@ -108,4 +110,26 @@ def tally_points(posts, fb_api):
         users = check_post(post, 'sharedposts', users, fb_api)
 
     return users
+
+def get_users_with_data(pageid, month, fb_api):
+    """Returns a sorted list of the users populated with point data"""
+    # Get a tuple of datetime objects, one at the start of the month, one at the end
+    time_period = get_time_period(month=month)
+
+    # Get a list of the posts on the page within the two dates in time_period
+    posts = fb_api.get_connections(
+        pageid,
+        'posts',
+        # Round times to shorten request URL
+        since=round(time_period[0].timestamp()),
+        until=round(time_period[1].timestamp())
+    )['data']
+
+    # Count all the points up
+    users = tally_points(posts, fb_api)
+
+    # Sort the result
+    sorted_users = sorted(users.values(), reverse=True)
+
+    return sorted_users
 

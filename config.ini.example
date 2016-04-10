@@ -1,0 +1,4 @@
+# Get these values from developer.facebook.com
+[API CONNECTION]
+AppID = APPID_GOES_HERE
+AppSecret = APPSECRET_GOES_HERE
